@@ -1,0 +1,50 @@
+/*
+ * Компонент для работы с модулем интерфейса энкодера Modbus RTU.
+ */
+component spindle_encoder "lathe spindle with encoder";
+
+//---------------------------------------------------------------
+
+param rw u32 ppr = 1000;
+pin in float pos_in "Rotation position increment in pulses";
+pin out float pos_degrees "Rotation position in degrees";
+pin out float pos_out "Rotation position in float";
+pin out float speed_rps "Spindle speed int RPS";
+pin in s32 direction "Spindle direction";
+pin in s32 index_in "Spindle index in";
+pin in s32 speed_rpm "Spindle speed in RPMs";
+pin in s32 heartbeat "Modbus data read heartbeat";
+pin io bit index_enable "Spindle index enable from/to motion";
+
+variable float prev_heartbeat;
+
+//---------------------------------------------------------------
+
+function _;
+license "GPL";
+
+;;
+
+FUNCTION(_) {
+    speed_rps = (float)speed_rpm / 60.0;
+    if (heartbeat != prev_heartbeat) {
+	prev_heartbeat = heartbeat;
+	if (!direction) {
+	    pos_out += ((float)pos_in / (float)ppr);
+	} else {
+	    pos_out -= ((float)pos_in / (float)ppr);
+        }
+    }
+
+    // Положение в градусах передаем для удобства,
+    // его можно будет показать на дисплее и потом использовать
+    // для деления.
+    pos_degrees = (float)pos_in / (float)ppr * 360.0;
+
+    // При проходе метки индекса, и если передан index-enable
+    // сбрасываем обороты и index-enable тоже.
+    if (index_enable && index_in) {
+	index_enable = 0;
+	pos_out = 0;
+    }
+}
