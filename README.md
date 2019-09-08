@@ -1,12 +1,10 @@
-Incremental encoder Modbus interface
-====================================
+# Incremental encoder Modbus RTU interface
 
 This device is used to read incremental encoder meanings with Modbus.
 It supports encoders from 100 to 1000PPR and interpolate position up to 4 times, 
 so maximum counts is virtual 4000PPR.
 
 ## What does it do?
-================
 
 This small attiny2313 module and LinuxCNC component allows you to connect almost any precision encoder into LinuxCNC
 and it works even if it has no Z phase output.
@@ -15,7 +13,6 @@ It allows your lathe execute G33, G33.1 (synchronized motion) and G76 (threading
 use G96 (constant surface speed) spindle control strategy.
 
 ## Modbus
-======
 
 Device has slave ID 0x85. There are 3 16 bit analog registers starting from reference address 0x00,
 containing current position, current speed in RPM and current Z-index value.
@@ -23,7 +20,6 @@ containing current position, current speed in RPM and current Z-index value.
 Device UART speed is 38400bps.
 
 ## Connection to LinuxCNC
-======================
 
 Go to ./linuxcnc and execute:
 
