@@ -5,6 +5,15 @@ This device is used to read incremental encoder meanings with Modbus.
 It supports encoders from 100 to 1000PPR and interpolate position up to 4 times, 
 so maximum counts is virtual 4000PPR.
 
+What does it do?
+================
+
+This small attiny2313 module and LinuxCNC component allows you to connect almost any precision encoder into LinuxCNC
+and it works even if it has no Z phase output.
+
+It allows your lathe execute G33, G33.1 (synchronized motion) and G76 (threading) canned cycles and 
+use G96 (constant surface speed) spindle control strategy.
+
 Modbus
 ======
 
@@ -45,4 +54,3 @@ Also you'll need to load mb2hal module into userspace:
 ```
 loadusr -W mb2hal config=modbus_config.ini
 ```
-
