@@ -19,7 +19,7 @@ extern volatile int16_t encIncrement;
 extern volatile uint8_t encPhases, encPhasesPrev;
 
 // Таблица приращений
-const int8_t incTable[4][4] = {{0,-1,1,0}, {1,0,0,-1}, {-1,0,0,1}, {0,1,-1,0}};
+static const int8_t incTable[4][4] = {{0,-1,1,0}, {1,0,0,-1}, {-1,0,0,1}, {0,1,-1,0}};
 
 //
 // Тут происходит отправка данных посылки
@@ -82,7 +82,11 @@ ISR(TIMER0_COMPA_vect) {
     // мы не прошил полный оборот. То есть пока выставлена метка
     // мы просто пропускаем этот замер.
     if (!encIndex) {
-	encDirection =  (encDirectionMeasure > encPosition);
+	PORTB &= ~(1 << RED_LED);	// Погасим светодиод метки индекса
+	// 0 - вращение в положительную сторону, 1 - в отрицательную
+	encDirection =  (encDirectionMeasure > encPosition); 
+    } else {
+	PORTB |= (1 << RED_LED);	// Зажжем светодиод метки индекса
     }
     encDirectionMeasure = encPosition;
 
@@ -100,7 +104,7 @@ ISR(PCINT_vect) {
     // так как контроллер просто зависнет, если прерывания
     // будут поступать сильно часто.
     if (encBusy) return;
-    encBusy = 1; 
+    encBusy = 1;
 
     // Считаем позицию по фазовому сдвигу
     uint8_t encPhases = PINB & 0x03; // PCINT0 + PCINT1
@@ -109,6 +113,11 @@ ISR(PCINT_vect) {
     encIncrement += inc;
     encPhasesPrev = encPhases;
 
+    // Замер позиции для счетчика оборотов по фазе А
+    if (PINB & 0x01)  {
+	++encSpeedMeasure;
+    }
+
     // Расчет позиции метки Z
 #ifdef ENCODER_HAS_Z
     if (PINB & 0x04) {
@@ -116,25 +125,15 @@ ISR(PCINT_vect) {
 	encIndex = 1;		// Сохраняем данные что прошли метку Z
     }
 #else
-    if (encPosition > (ENCODER_PPR - 1)) { 
+    // Метка Z эмулируется при переходе 
+    // через полный оборот или при переходе черео 0.
+    if ((encPosition >= ENCODER_PPR) ||
+	(encPosition <= -ENCODER_PPR) ||
+	(encPosition == 0)) {
 	encPosition = 0;
-	encIndex = 1;
-    } else if (encPosition < 0) {
-	encPosition = ENCODER_PPR - 1;
 	encIndex = 1;
     }
 #endif
-
-    if (encIndex) {
-	PORTB |= (1 << RED_LED);	// Зажжем светодиод
-    } else {
-	PORTB &= ~(1 << RED_LED);	// Погасим светодиод
-    }
-
-    // Замер позиции для счетчика оборотов по фазе А
-    if ((PINB & 0x07) == 0x01)  { // Если из 3 пинов сработал один на фазе А
-	encSpeedMeasure++;
-    }
 
     encBusy = 0;
 }

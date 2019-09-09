@@ -58,8 +58,10 @@ void sendRegisterValues(uint16_t regAddr, uint16_t regCount) {
 	    case 1:
 		r = heartbeat; break;
 	    case 2:
-		r = encPosition; break;
+		// Не выдаем отрицательные значения, т.к. mb2hal понимает только беззнаковые
+		r = encPosition > 0 ? encPosition : -encPosition; break;
 	    case 3:
+		// и тут тоже самое...
 		r = encIncrement > 0 ? encIncrement : -encIncrement; break;
 	    case 4:
 		r = encSpeed; break;
