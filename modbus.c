@@ -1,28 +1,41 @@
+/*
+
+Copyright 2019 Pavlov Denis <futurelink.vl@gmail.com>
+
+This is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+It is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this project.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 #include "config.h"
 #include "modbus.h"
 
 // Состояние кодера
-volatile uint8_t encPhases = 0,
-		 encPhasesPrev = 0,
-		 encIndex = 0,
+volatile uint8_t encIndex = 0,
 		 encDirection = 0,
 		 heartbeat = 0;
 
-volatile uint16_t encSpeed = 0,
-		  encDirectionMeasure = 0;
-
-volatile int16_t encIncrement = 0,
-		 encPrevPosition = 0,
-		 encPosition = 0;
+volatile uint16_t encSpeed = 0;
+int16_t encIncrement = 0,
+	encPosition = 0;
 
 uint8_t sendBuffer[SEND_BUFFER_MAX];
-volatile uint8_t sendLength = 0;
-volatile uint8_t sentLength = 0;
+uint8_t sendLength = 0, sentLength = 0;
 
 uint8_t recvBuffer[RECV_BUFFER_MAX];
 uint8_t recvLength = 0;
 
-void parseDatagram() {
+uint8_t parseDatagram() {
     uint16_t regAddr = 0;
     uint16_t regCount = 0;
     uint16_t crc = 0;
@@ -37,17 +50,21 @@ void parseDatagram() {
 	    if (crc == CRC16(&recvBuffer[0], recvLength - 2)) {
 		regAddr = (recvBuffer[2] << 8) | recvBuffer[3];
 		regCount = (recvBuffer[4] << 8) | recvBuffer[5];
-		if (regCount > 0) sendRegisterValues(regAddr, regCount);
+		if (regCount > 0)
+		    return sendRegisterValues(regAddr, regCount);
 	    } else sendError(recvBuffer[1], ERROR_INVALID_VALUE);
 	} else sendError(recvBuffer[1], ERROR_INVALID_FUNCTION);
     }
+    return 0;
 }
 
-void sendRegisterValues(uint16_t regAddr, uint16_t regCount) {
+uint8_t sendRegisterValues(uint16_t regAddr, uint16_t regCount) {
     uint8_t bytesCount = (regCount * 2);
     uint16_t r;
 
-    if (regAddr == 0) {
+    // Сделано тупо, зато быстро - получить данные можно только
+    // с адреса 0x00, и нужное количество регистров.
+    if (regAddr == 0x00) {
 	// Посылаем по 2 байта на регистр
 	sendBuffer[0] = SLAVE_ID;
 	sendBuffer[1] = 0x04;
@@ -55,22 +72,22 @@ void sendRegisterValues(uint16_t regAddr, uint16_t regCount) {
 
 	do {
 	    switch (regCount) {
-	    case 1:
-		r = heartbeat; break;
-	    case 2:
-		// Не выдаем отрицательные значения, т.к. mb2hal понимает только беззнаковые
-		r = (encPosition > 0) ? encPosition : -encPosition; break;
-	    case 3:
-		// и тут тоже самое...
-		r = (encIncrement > 0) ? encIncrement : -encIncrement; break;
-	    case 4:
-		r = encSpeed; break;
-	    case 5:
-		r = encIndex; break;
-	    case 6:
-		r = encDirection; break;
-	    default:
-		r = 0;
+		case 1:
+		    r = heartbeat; break;
+		case 2:
+		    // Не выдаем отрицательные значения, т.к. mb2hal понимает только беззнаковые
+		    r = (encPosition > 0) ? encPosition : -encPosition; break;
+		case 3:
+		    // и тут тоже самое...
+		    r = (encIncrement > 0) ? encIncrement : -encIncrement; break;
+		case 4:
+		    r = encSpeed; break;
+		case 5:
+		    r = encIndex; break;
+		case 6:
+		    r = encDirection; break;
+		default:
+		    r = 0;
 	    }
 	    sendBuffer[regCount * 2 + 1] = r >> 8;
 	    sendBuffer[regCount * 2 + 2] = r & 0xff;
@@ -88,10 +105,11 @@ void sendRegisterValues(uint16_t regAddr, uint16_t regCount) {
 	// Разрешаем передачу
 	UCSRB |= ((1 << UDRE) | (1 << TXEN));
 
-	return;
+	return 1;
     }
 
     sendError(0x04, ERROR_INVALID_ADDRESS);
+    return 0;
 }
 
 void sendError(uint8_t funcCode, uint8_t errorCode) {

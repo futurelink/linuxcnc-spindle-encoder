@@ -1,31 +1,25 @@
 /*
- * FreeModbus Libary: ATMega168 Port
- * Copyright (C) 2006 Christian Walter <wolti@sil.at>
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * File: $Id$
- */
 
-/* ----------------------- System includes ----------------------------------*/
+Copyright 2019 Pavlov Denis <futurelink.vl@gmail.com>
+
+This is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+It is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this project.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 #include "crc.h"
 
-/* ----------------------- Platform includes --------------------------------*/
-
-static const PROGMEM uint8_t aucCRCHi[] = {
+static const PROGMEM uint8_t CRCHi[] = {
     0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
     0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
     0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
@@ -46,7 +40,7 @@ static const PROGMEM uint8_t aucCRCHi[] = {
     0x40
 };
 
-static const PROGMEM uint8_t aucCRCLo[] = {
+static const PROGMEM uint8_t CRCLo[] = {
     0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4,
     0x04, 0xCC, 0x0C, 0x0D, 0xCD, 0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09,
     0x08, 0xC8, 0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 0x1E, 0xDE, 0xDF, 0x1F, 0xDD,
@@ -74,8 +68,8 @@ uint16_t CRC16(uint8_t *pucFrame, uint16_t usLen) {
 
     do  {
         iIndex = ucCRCLo ^ *pucFrame++;
-        ucCRCLo = ucCRCHi ^ pgm_read_byte(&aucCRCHi[iIndex]);
-        ucCRCHi = pgm_read_byte(&aucCRCLo[iIndex]);
+        ucCRCLo = ucCRCHi ^ pgm_read_byte(&CRCHi[iIndex]);
+        ucCRCHi = pgm_read_byte(&CRCLo[iIndex]);
     } while (--usLen);
 
     return (ucCRCHi << 8) | ucCRCLo;

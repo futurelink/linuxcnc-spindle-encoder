@@ -1,3 +1,22 @@
+/*
+
+Copyright 2019 Pavlov Denis <futurelink.vl@gmail.com>
+
+This is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+It is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this project.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 #include <avr/interrupt.h>
 
 #include "config.h"
@@ -6,18 +25,22 @@
 extern uint8_t recvLength;
 extern uint8_t recvBuffer[];
 
-extern volatile uint8_t sentLength;
-extern volatile uint8_t sendLength;
+extern uint8_t sentLength, sendLength;
 extern uint8_t sendBuffer[];
 
-volatile uint8_t encBusy;
-volatile uint16_t encSpeedMeasure;
-extern volatile int16_t encPosition, encDirectionMeasure, encSpeed, encIncrement;
-extern volatile int8_t encDirection;
-extern volatile uint8_t encIndex, encPhases, encPhasesPrev;
+// Переменные не volatile - экономим такты в PCINT_vect
+// да и не надо т.к. меняются только в обработчиках прерываний.
+extern int8_t encDirection;
+extern int16_t encPosition, encSpeed, encIncrement;
+extern uint8_t encIndex;
+
+// Локальные для данного файла
+int16_t encDirectionMeasure;
+uint8_t  encPhases, encPhasesPrev;
+uint16_t encSpeedMeasure;
 
 // Таблица приращений
-static const int8_t incTable[4][4] = {{0,-1,1,0}, {1,0,0,-1}, {-1,0,0,1}, {0,1,-1,0}};
+static const int8_t incTable[16] = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};
 
 //
 // Тут происходит отправка данных посылки
@@ -57,11 +80,12 @@ ISR(TIMER1_COMPA_vect) {
 
     // Если что-то принято, надо обработать
     if (recvLength > 0) {
-	parseDatagram();	// Обработаем посылку
-	recvLength = 0;		// Сбрасыаем приемный буфер
-	encIncrement = 0;	// Сбрасываем инкремент
-	encIndex = 0;		// Сбрасываем метку Z
-	PORTB &= ~(1 << RED_LED);	// Погасим светодиод метки Z
+	if (parseDatagram()) {	// Обработаем посылку
+	    recvLength = 0;		// Сбрасыаем приемный буфер
+	    encIncrement = 0;	// Сбрасываем инкремент
+	    encIndex = 0;		// Сбрасываем метку Z
+	    PORTB &= ~(1 << RED_LED);	// Погасим светодиод метки Z
+	}
     }
 }
 
@@ -74,7 +98,6 @@ ISR(TIMER0_COMPA_vect) {
     // мы не прошил полный оборот. То есть пока выставлена метка
     // мы просто пропускаем этот замер.
     if (!encIndex) {
-	PORTB &= ~(1 << RED_LED);	// Погасим светодиод метки индекса
 	// 0 - вращение в положительную сторону, 1 - в отрицательную
 	encDirection =  (encDirectionMeasure > encPosition); 
     } else {
@@ -94,7 +117,7 @@ ISR(TIMER0_COMPA_vect) {
 ISR(PCINT_vect) {
     // Считаем позицию по фазовому сдвигу
     uint8_t encPhases = PINB & 0x03; // PCINT0 + PCINT1
-    int8_t inc = incTable[encPhases][encPhasesPrev];
+    int8_t inc = incTable[encPhasesPrev * 4 + encPhases];
     encPosition += inc;  // Позиция энкодера в метках
     encIncrement += inc; // Количество пройденных меток с момента последней передачи данных
     encPhasesPrev = encPhases;

@@ -1,3 +1,22 @@
+/*
+
+Copyright 2019 Pavlov Denis <futurelink.vl@gmail.com>
+
+This is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+It is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this project.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 #ifndef __MODBUS_H
 #define __MODBUS_H
 
@@ -17,10 +36,10 @@
 #define ERROR_PROCESSING	0x05
 #define ERROR_BUSY		0x06
 
-void parseDatagram(void);
+uint8_t parseDatagram(void);
 
 static void sendError(uint8_t funcCode, uint8_t errorCode);
-static void sendRegisterValues(uint16_t regAddr, uint16_t regCount);
+static uint8_t sendRegisterValues(uint16_t regAddr, uint16_t regCount);
 void sendBufferContents(void);
 
 #endif
