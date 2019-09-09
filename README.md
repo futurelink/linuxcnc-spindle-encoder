@@ -2,7 +2,10 @@
 
 This device is used to read incremental encoder meanings with Modbus.
 It supports encoders from 100 to 1000PPR and interpolate position up to 4 times, 
-so maximum counts is virtual 4000PPR.
+so maximum resolutuion is 4000PPR. 
+
+It's tested on 1000PPR encoder and it reads correct values on about 1000RPMs on internal
+ATtiny2313 RC oscillator.
 
 ## What does it do?
 
