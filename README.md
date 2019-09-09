@@ -14,8 +14,9 @@ use G96 (constant surface speed) spindle control strategy.
 
 ## Modbus
 
-Device has slave ID 0x85. There are 3 16 bit analog registers starting from reference address 0x00,
-containing current position, current speed in RPM and current Z-index value.
+Device has slave ID 0x85. There are 6 16bit analog registers starting from reference address 0x00,
+containing (0)heartbeat, (1)current position, (2)position increment, (3)current speed in RPM, (4)current Z-index value
+and (5)encoder direction.
 
 Device UART speed is 38400bps.
 
