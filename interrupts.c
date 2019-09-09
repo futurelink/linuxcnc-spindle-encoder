@@ -12,11 +12,9 @@ extern uint8_t sendBuffer[];
 
 volatile uint8_t encBusy;
 volatile uint16_t encSpeedMeasure;
-extern volatile uint8_t encIndex;
-extern volatile int16_t encPosition, encDirectionMeasure, encSpeed;
+extern volatile int16_t encPosition, encDirectionMeasure, encSpeed, encIncrement;
 extern volatile int8_t encDirection;
-extern volatile int16_t encIncrement;
-extern volatile uint8_t encPhases, encPhasesPrev;
+extern volatile uint8_t encIndex, encPhases, encPhasesPrev;
 
 // Таблица приращений
 static const int8_t incTable[4][4] = {{0,-1,1,0}, {1,0,0,-1}, {-1,0,0,1}, {0,1,-1,0}};
@@ -25,7 +23,6 @@ static const int8_t incTable[4][4] = {{0,-1,1,0}, {1,0,0,-1}, {-1,0,0,1}, {0,1,-
 // Тут происходит отправка данных посылки
 //
 ISR(USART_UDRE_vect) {
-    cli();
     if (sentLength == sendLength) {
 	UCSRB &= ~((1 << UDRE) | (1 << TXEN));	// Запрещаем передачу
 	PORTB &= ~(1 << YELLOW_LED);		// Погасим светодиод, передали сообщение
@@ -34,7 +31,6 @@ ISR(USART_UDRE_vect) {
 	PORTB |= (1 << YELLOW_LED);		// Зажжем светодиод, передаем сообщение
 	UDR = sendBuffer[sentLength++];
     }
-    sei();
 }
 
 //
@@ -42,7 +38,6 @@ ISR(USART_UDRE_vect) {
 //
 ISR(USART_RX_vect) {
     // Если прием байта закончен - добавляем его в нашу датаграмму
-    cli();
     if (UCSRA & (1 << RXC)) {
 	if (recvLength < RECV_BUFFER_MAX) {
 	    recvBuffer[recvLength++] = UDR;
@@ -52,7 +47,6 @@ ISR(USART_RX_vect) {
 	// Включаем таймер тишины
 	TCCR1B = (1 << CS12) | (1 << CS10);
     }
-    sei();
 }
 
 // В прерывании таймера если он таки сработал, значит прием данных завершен.
@@ -63,12 +57,10 @@ ISR(TIMER1_COMPA_vect) {
 
     // Если что-то принято, надо обработать
     if (recvLength > 0) {
-	cli();
 	parseDatagram();	// Обработаем посылку
 	recvLength = 0;		// Сбрасыаем приемный буфер
 	encIncrement = 0;	// Сбрасываем инкремент
 	encIndex = 0;		// Сбрасываем метку Z
-	sei();
 	PORTB &= ~(1 << RED_LED);	// Погасим светодиод метки Z
     }
 }
@@ -100,21 +92,16 @@ ISR(TIMER0_COMPA_vect) {
 // Обработка сигналов энкодера
 //
 ISR(PCINT_vect) {
-    // Развязываем обработку прерывания переменной,
-    // так как контроллер просто зависнет, если прерывания
-    // будут поступать сильно часто.
-    if (encBusy) return;
-    encBusy = 1;
-
     // Считаем позицию по фазовому сдвигу
     uint8_t encPhases = PINB & 0x03; // PCINT0 + PCINT1
     int8_t inc = incTable[encPhases][encPhasesPrev];
-    encPosition += inc;
-    encIncrement += inc;
+    encPosition += inc;  // Позиция энкодера в метках
+    encIncrement += inc; // Количество пройденных меток с момента последней передачи данных
     encPhasesPrev = encPhases;
 
     // Замер позиции для счетчика оборотов по фазе А
-    if (PINB & 0x01)  {
+    // Считаем только когда фаза А меняется с 0 на 1
+    if ((PINB & 0x07) == 0x01)  {
 	++encSpeedMeasure;
     }
 
@@ -134,6 +121,4 @@ ISR(PCINT_vect) {
 	encIndex = 1;
     }
 #endif
-
-    encBusy = 0;
 }

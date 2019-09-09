@@ -7,6 +7,7 @@ TARGET = encoder-modbus
 CC=avr-gcc
 OBJCOPY=avr-objcopy
 AVRDUDE=avrdude
+MODPOLL=modpoll
 
 ## Options common to compile, link and assembly rules
 COMMON = -mmcu=$(MCU)
@@ -32,6 +33,12 @@ OBJECTS = $(SOURCES:.c=.o)
 
 ## Build
 all: $(TARGET).elf $(TARGET).hex
+
+flash: $(TARGET).hex
+	$(AVRDUDE) -p $(MCU) -c stk500 -P /dev/ttyUSB1 -v -b 115200 -e -U flash:w:$(TARGET).hex:i
+
+poll:
+	$(MODPOLL) -m rtu -a 0x85 -c 6 -t 3 -l 100 -b 38400 -p none /dev/ttyUSB0
 
 ##Link
 $(TARGET).elf: $(OBJECTS)

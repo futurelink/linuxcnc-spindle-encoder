@@ -8,12 +8,12 @@ volatile uint8_t encPhases = 0,
 		 encDirection = 0,
 		 heartbeat = 0;
 
-volatile uint16_t encPrevPosition = 0,
-		  encPosition = 0,
-		  encSpeed = 0,
+volatile uint16_t encSpeed = 0,
 		  encDirectionMeasure = 0;
 
-volatile int16_t encIncrement = 0;
+volatile int16_t encIncrement = 0,
+		 encPrevPosition = 0,
+		 encPosition = 0;
 
 uint8_t sendBuffer[SEND_BUFFER_MAX];
 volatile uint8_t sendLength = 0;
@@ -59,10 +59,10 @@ void sendRegisterValues(uint16_t regAddr, uint16_t regCount) {
 		r = heartbeat; break;
 	    case 2:
 		// Не выдаем отрицательные значения, т.к. mb2hal понимает только беззнаковые
-		r = encPosition > 0 ? encPosition : -encPosition; break;
+		r = (encPosition > 0) ? encPosition : -encPosition; break;
 	    case 3:
 		// и тут тоже самое...
-		r = encIncrement > 0 ? encIncrement : -encIncrement; break;
+		r = (encIncrement > 0) ? encIncrement : -encIncrement; break;
 	    case 4:
 		r = encSpeed; break;
 	    case 5:
