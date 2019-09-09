@@ -1,6 +1,5 @@
 ## General Flags
 PROJECT = encoder-modbus
-#MCU = atmega328
 MCU = attiny2313
 TARGET = encoder-modbus
 
@@ -38,7 +37,7 @@ flash: $(TARGET).hex
 	$(AVRDUDE) -p $(MCU) -c stk500 -P /dev/ttyUSB1 -v -b 115200 -e -U flash:w:$(TARGET).hex:i
 
 poll:
-	$(MODPOLL) -m rtu -a 0x85 -c 6 -t 3 -l 100 -b 38400 -p none /dev/ttyUSB0
+	$(MODPOLL) -m rtu -a 0x85 -c 6 -t 3 -l 50 -b 38400 -p none /dev/ttyUSB0
 
 ##Link
 $(TARGET).elf: $(OBJECTS)

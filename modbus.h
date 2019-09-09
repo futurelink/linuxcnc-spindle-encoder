@@ -38,8 +38,4 @@ along with this project.  If not, see <http://www.gnu.org/licenses/>.
 
 uint8_t parseDatagram(void);
 
-static void sendError(uint8_t funcCode, uint8_t errorCode);
-static uint8_t sendRegisterValues(uint16_t regAddr, uint16_t regCount);
-void sendBufferContents(void);
-
 #endif

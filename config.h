@@ -23,7 +23,6 @@ along with this project.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-#define F_CPU 		8000000UL
 #define SLAVE_ID	0x85
 #define RED_LED		PIN3
 #define YELLOW_LED	PIN4

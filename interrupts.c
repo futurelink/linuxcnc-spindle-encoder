@@ -42,6 +42,8 @@ uint16_t encSpeedMeasure;
 // Таблица приращений
 static const int8_t incTable[16] = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};
 
+/* ---------------------------------------------------------------------*/
+
 //
 // Тут происходит отправка данных посылки
 //
@@ -60,14 +62,13 @@ ISR(USART_UDRE_vect) {
 // Тут происходит заполнение данными нашей посылки
 //
 ISR(USART_RX_vect) {
-    // Если прием байта закончен - добавляем его в нашу датаграмму
     if (UCSRA & (1 << RXC)) {
 	if (recvLength < RECV_BUFFER_MAX) {
 	    recvBuffer[recvLength++] = UDR;
 	}
-        TCNT1 = 0;
 
 	// Включаем таймер тишины
+	TCNT1 = 0;
 	TCCR1B = (1 << CS12) | (1 << CS10);
     }
 }
@@ -80,11 +81,12 @@ ISR(TIMER1_COMPA_vect) {
 
     // Если что-то принято, надо обработать
     if (recvLength > 0) {
-	if (parseDatagram()) {	// Обработаем посылку
+	if (encIndex) PORTB |= (1 << RED_LED);	// Зажжем светодиод метки индекса
+	if (parseDatagram()) {		// Обработаем посылку
 	    recvLength = 0;		// Сбрасыаем приемный буфер
-	    encIncrement = 0;	// Сбрасываем инкремент
-	    encIndex = 0;		// Сбрасываем метку Z
-	    PORTB &= ~(1 << RED_LED);	// Погасим светодиод метки Z
+	    encIncrement = 0;		// Сбрасываем инкремент
+	    encIndex = 0;		// Сбрасываем метку индекса
+	    PORTB &= ~(1 << RED_LED);	// Погасим светодиод метки индекса
 	}
     }
 }
@@ -100,8 +102,6 @@ ISR(TIMER0_COMPA_vect) {
     if (!encIndex) {
 	// 0 - вращение в положительную сторону, 1 - в отрицательную
 	encDirection =  (encDirectionMeasure > encPosition); 
-    } else {
-	PORTB |= (1 << RED_LED);	// Зажжем светодиод метки индекса
     }
     encDirectionMeasure = encPosition;
 
@@ -122,20 +122,19 @@ ISR(PCINT_vect) {
     encIncrement += inc; // Количество пройденных меток с момента последней передачи данных
     encPhasesPrev = encPhases;
 
-    // Замер позиции для счетчика оборотов по фазе А
+    // Замер позиции для счетчика скорости по фазе А
     // Считаем только когда фаза А меняется с 0 на 1
     if ((PINB & 0x07) == 0x01)  {
 	++encSpeedMeasure;
     }
 
-    // Расчет позиции метки Z
 #ifdef ENCODER_HAS_Z
     if (PINB & 0x04) {
 	encPosition = 0;	// Метка Z сбрасывает позицию на 0
 	encIndex = 1;		// Сохраняем данные что прошли метку Z
     }
 #else
-    // Метка Z эмулируется при переходе 
+    // Метка Z эмулируется при переходе
     // через полный оборот или при переходе черео 0.
     if ((encPosition >= ENCODER_PPR) ||
 	(encPosition <= -ENCODER_PPR) ||

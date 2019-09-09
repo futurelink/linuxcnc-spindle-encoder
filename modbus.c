@@ -20,7 +20,8 @@ along with this project.  If not, see <http://www.gnu.org/licenses/>.
 #include "config.h"
 #include "modbus.h"
 
-// Состояние кодера
+/* Variables */
+
 volatile uint8_t encIndex = 0,
 		 encDirection = 0,
 		 heartbeat = 0;
@@ -34,6 +35,13 @@ uint8_t sendLength = 0, sentLength = 0;
 
 uint8_t recvBuffer[RECV_BUFFER_MAX];
 uint8_t recvLength = 0;
+
+/* Function declarations */
+
+static uint8_t sendRegisterValues(uint16_t regAddr, uint16_t regCount);
+static void sendError(uint8_t funcCode, uint8_t errorCode);
+
+/* ---------------------------------------------------------------------*/
 
 uint8_t parseDatagram() {
     uint16_t regAddr = 0;
