@@ -2,8 +2,13 @@
 PROJECT = encoder-modbus
 MCU = attiny2313
 TARGET = encoder-modbus
-F_CPU = 16000000UL
 
+# Fuses for external oscillator 16Mhz
+F_CPU = 16000000UL
+LFUSE = 0xCE
+HFUSE = 0xDF
+
+# Toolchain
 CC=avr-gcc
 OBJCOPY=avr-objcopy
 AVRDUDE=avrdude -P /dev/ttyUSB0
@@ -33,12 +38,10 @@ OBJECTS = $(SOURCES:.c=.o)
 all: $(TARGET).elf $(TARGET).hex
 
 flash: $(TARGET).hex
-	$(AVRDUDE) -p $(MCU) -c stk500 -v -b 115200 -e -U flash:w:$(TARGET).hex:i
-	$(AVRDUDE) -p $(MCU) -c stk500 -v -b 115200 -U lfuse:w:0xce:m
-	$(AVRDUDE) -p $(MCU) -c stk500 -v -b 115200 -U hfuse:w:0xdf:m
+	$(AVRDUDE) -p $(MCU) -c stk500 -v -b 115200 -e -U flash:w:$(TARGET).hex:i -U lfuse:w:$(LFUSE):m -U hfuse:w:$(HFUSE):m
 
 poll:
-	$(MODPOLL) -m rtu -a 0x85 -c 6 -t 3 -l 50 -b 38400
+	$(MODPOLL) -m rtu -a 0x85 -c 6 -t 3 -l 20 -b 38400
 
 ##Link
 $(TARGET).elf: $(OBJECTS)
