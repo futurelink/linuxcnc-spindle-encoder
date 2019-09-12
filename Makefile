@@ -2,19 +2,18 @@
 PROJECT = encoder-modbus
 MCU = attiny2313
 TARGET = encoder-modbus
+F_CPU = 16000000UL
 
 CC=avr-gcc
 OBJCOPY=avr-objcopy
-AVRDUDE=avrdude
-MODPOLL=modpoll
+AVRDUDE=avrdude -P /dev/ttyUSB0
+MODPOLL=modpoll -p none /dev/ttyUSB1
 
-## Options common to compile, link and assembly rules
 COMMON = -mmcu=$(MCU)
 
 ## Compile options common for all C compilation units.
 CFLAGS = $(COMMON) -std=gnu99
-CFLAGS += -Wall -gstabs -DF_CPU=8000000UL  -Os -Wall -Wstrict-prototypes -fno-exceptions -ffunction-sections -fdata-sections
-#CFLAGS += -Wp,-M,-MP,-MT,$(*F).o,-MF,dep/$(@F).d 
+CFLAGS += -Wall -gstabs -DF_CPU=$(F_CPU)  -Os -Wall -Wstrict-prototypes -fno-exceptions -ffunction-sections -fdata-sections
 
 ## Assembly specific flags
 ASMFLAGS = $(COMMON)
@@ -34,10 +33,12 @@ OBJECTS = $(SOURCES:.c=.o)
 all: $(TARGET).elf $(TARGET).hex
 
 flash: $(TARGET).hex
-	$(AVRDUDE) -p $(MCU) -c stk500 -P /dev/ttyUSB1 -v -b 115200 -e -U flash:w:$(TARGET).hex:i
+	$(AVRDUDE) -p $(MCU) -c stk500 -v -b 115200 -e -U flash:w:$(TARGET).hex:i
+	$(AVRDUDE) -p $(MCU) -c stk500 -v -b 115200 -U lfuse:w:0xce:m
+	$(AVRDUDE) -p $(MCU) -c stk500 -v -b 115200 -U hfuse:w:0xdf:m
 
 poll:
-	$(MODPOLL) -m rtu -a 0x85 -c 6 -t 3 -l 50 -b 38400 -p none /dev/ttyUSB0
+	$(MODPOLL) -m rtu -a 0x85 -c 6 -t 3 -l 50 -b 38400
 
 ##Link
 $(TARGET).elf: $(OBJECTS)

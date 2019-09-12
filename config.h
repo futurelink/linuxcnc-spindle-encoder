@@ -38,6 +38,6 @@ along with this project.  If not, see <http://www.gnu.org/licenses/>.
 
 #define TIMER0_PRESCALER    ( 1024U )
 #define TIMER0_FREQ         ( F_CPU / TIMER0_PRESCALER )
-#define TIMER0_PERIOD_MS    ( 32 )
+#define TIMER0_PERIOD_MS    ( 16 )
 
 #endif
