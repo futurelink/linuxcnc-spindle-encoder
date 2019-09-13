@@ -4,7 +4,7 @@ This device is used to read incremental encoder meanings with Modbus.
 It supports encoders from 100 to 1000PPR and interpolate position up to 4 times, 
 so maximum resolutuion is 4000PPR. 
 
-(https://github.com/futurelink/linuxcnc-spindle-encoder/blob/devel/device/interface-v1.2.jpg)
+![Device KiCAD 3D view](https://github.com/futurelink/linuxcnc-spindle-encoder/blob/devel/device/interface-v1.2.jpg)
 
 It's tested on 1000PPR encoder and it reads correct values on about 1000RPMs on internal
 ATtiny2313 RC oscillator.
