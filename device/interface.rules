@@ -11,7 +11,7 @@
     (via_costs 50)
     (plane_via_costs 5)
     (start_ripup_costs 100)
-    (start_pass_no 2014)
+    (start_pass_no 2927)
     (layer_rule F.Cu
       (active on)
       (preferred_direction vertical)
@@ -55,6 +55,12 @@
     (attach off)
   )
   (via 
+    "Via[0-1]_800:400_um-RS-485" "Via[0-1]_800:400_um" "RS-485"
+  )
+  (via 
+    "Via[0-1]_1200:800_um-RS-485" "Via[0-1]_1200:800_um" "RS-485"
+  )
+  (via 
     "Via[0-1]_800:400_um" "Via[0-1]_800:400_um" default
   )
   (via 
@@ -77,6 +83,9 @@
   )
   (via 
     "Via[0-1]_1200:800_um-+5V" "Via[0-1]_1200:800_um" +5V
+  )
+  (via_rule
+    "RS-485" "Via[0-1]_800:400_um-RS-485"
   )
   (via_rule
     default "Via[0-1]_800:400_um"
@@ -103,7 +112,7 @@
   (class "kicad_default"
     /PHASEB /PHASEZ "Net-(P1-Pad3)" "Net-(P1-Pad2)" /PHASEA "Net-(P1-Pad1)" /RST "Net-(D1-Pad1)"
     "Net-(D2-Pad1)" "Net-(C1-Pad1)" "Net-(C2-Pad1)" /MISO /SCK /MOSI /RX /TX
-    "Net-(IC1-Pad6)" "Net-(IC1-Pad7)" "Net-(IC1-Pad8)" "Net-(IC1-Pad9)" "Net-(IC1-Pad11)" /LED1 /LED2
+    /LED1 /LED2 /RDE /A0 /A1 /A2 /A3
     (clearance_class "kicad_default")
     (via_rule kicad_default)
     (rule
@@ -114,7 +123,7 @@
     )
   )
   (class +24V
-    +24V GND
+    +24V GND "Net-(D6-Pad2)"
     (clearance_class +24V)
     (via_rule +24V)
     (rule
@@ -128,6 +137,17 @@
     +5V
     (clearance_class +5V)
     (via_rule +5V)
+    (rule
+      (width 500.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "RS-485"
+    "Net-(J2-Pad1)" "Net-(J2-Pad2)"
+    (clearance_class "RS-485")
+    (via_rule RS-485)
     (rule
       (width 500.0)
     )

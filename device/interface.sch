@@ -1,4 +1,5 @@
 EESchema Schematic File Version 4
+LIBS:interface-cache
 EELAYER 26 0
 EELAYER END
 $Descr A4 11693 8268
@@ -341,10 +342,6 @@ F 3 "" H 8800 3200 50  0000 C CNN
 	1    8800 3200
 	1    0    0    -1  
 $EndComp
-NoConn ~ 6950 4100
-NoConn ~ 6950 4200
-NoConn ~ 6950 4300
-NoConn ~ 6950 4400
 $Comp
 L power:PWR_FLAG #FLG014
 U 1 1 5D7B25FE
@@ -985,10 +982,94 @@ Wire Wire Line
 	10000 2050 10000 1950
 Wire Wire Line
 	9800 2050 10000 2050
+$Comp
+L Switch:SW_DIP_x04 SW1
+U 1 1 5D7BE9E3
+P 7800 2550
+F 0 "SW1" H 7800 3017 50  0000 C CNN
+F 1 "SW_DIP_x04" H 7800 2926 50  0000 C CNN
+F 2 "Button_Switch_THT:SW_DIP_SPSTx04_Slide_9.78x12.34mm_W7.62mm_P2.54mm" H 7800 2550 50  0001 C CNN
+F 3 "" H 7800 2550 50  0001 C CNN
+	1    7800 2550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8100 2350 8100 2450
+Wire Wire Line
+	8100 2550 8100 2450
+Connection ~ 8100 2450
+Wire Wire Line
+	8100 2650 8100 2550
+Connection ~ 8100 2550
+$Comp
+L power:+5V #PWR0103
+U 1 1 5D7CF99B
+P 8200 2400
+F 0 "#PWR0103" H 8200 2250 50  0001 C CNN
+F 1 "+5V" H 8215 2573 50  0000 C CNN
+F 2 "" H 8200 2400 50  0001 C CNN
+F 3 "" H 8200 2400 50  0001 C CNN
+	1    8200 2400
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8200 2400 8200 2450
+Wire Wire Line
+	8200 2450 8100 2450
+Entry Wire Line
+	7250 2250 7350 2350
+Entry Wire Line
+	7250 2350 7350 2450
+Entry Wire Line
+	7250 2450 7350 2550
+Entry Wire Line
+	7250 2550 7350 2650
+Wire Wire Line
+	7500 2350 7350 2350
+Wire Wire Line
+	7500 2450 7350 2450
+Wire Wire Line
+	7500 2550 7350 2550
+Wire Wire Line
+	7500 2650 7350 2650
+Text Label 7350 2350 0    50   ~ 0
+A0
+Text Label 7350 2450 0    50   ~ 0
+A1
+Text Label 7350 2550 0    50   ~ 0
+A2
+Text Label 7350 2650 0    50   ~ 0
+A3
+Entry Wire Line
+	7150 4100 7250 4200
+Entry Wire Line
+	7150 4200 7250 4300
+Entry Wire Line
+	7150 4300 7250 4400
+Entry Wire Line
+	7150 4400 7250 4500
+Entry Wire Line
+	7150 4100 7250 4200
+Wire Wire Line
+	7150 4100 6950 4100
+Wire Wire Line
+	7150 4200 6950 4200
+Wire Wire Line
+	7150 4300 6950 4300
+Wire Wire Line
+	7150 4400 6950 4400
 Wire Bus Line
 	7550 4600 7550 4900
 Wire Bus Line
 	8550 1650 8550 4600
 Wire Bus Line
-	7250 2950 7250 4600
+	7250 2250 7250 4600
+Text Label 7050 4100 0    50   ~ 0
+A0
+Text Label 7050 4200 0    50   ~ 0
+A1
+Text Label 7050 4300 0    50   ~ 0
+A2
+Text Label 7050 4400 0    50   ~ 0
+A3
 $EndSCHEMATC
