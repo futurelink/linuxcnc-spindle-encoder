@@ -2,5 +2,4 @@
 *.pcb-bak
 *.dsn
 *-cache.lib
-gerber
-
+gerber/*
