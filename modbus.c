@@ -22,7 +22,7 @@ along with this project.  If not, see <http://www.gnu.org/licenses/>.
 
 /* Variables */
 
-uint8_t slaveAddr = 0;
+uint8_t slaveAddr;
 
 // Регистры данных
 volatile int16_t registers[6];
@@ -47,45 +47,55 @@ uint8_t parseDatagram() {
     uint16_t regAddr = 0;
     uint16_t regCount = 0;
     uint16_t crc = 0;
+    uint8_t err = 0;
 
     // Минимальная длина датаграммы 8 байт
     // Посылка адресована нам, парсим
-    if ((recvLength > 7) && (recvBuffer[0] == SLAVE_ID + slaveAddr)) {
-	if (recvBuffer[1] == REGISTER_READ_FUNC) { // Чтение аналоговых регистров
-	    crc = (recvBuffer[7] << 8) | recvBuffer[6];
-	    if (crc == CRC16(&recvBuffer[0], recvLength - 2)) {
-		regAddr = (recvBuffer[2] << 8) | recvBuffer[3];
+    if ((recvLength > 7) && (recvBuffer[0] == slaveAddr)) {
+	switch (recvBuffer[1]) {
+	    case REGISTER_READ_FUNC: // Чтение аналоговых регистров
+		crc = (recvBuffer[7] << 8) | recvBuffer[6];
+		if (crc == CRC16(&recvBuffer[0], recvLength - 2)) {
+		    regAddr = (recvBuffer[2] << 8) | recvBuffer[3];
+		    regCount = (recvBuffer[4] << 8) | recvBuffer[5];
+		    if ((regCount > 0) && (regCount <= REGISTER_MAX))
+			return sendRegisterValues(regAddr, regCount);
+		} else err = ERROR_INVALID_VALUE;
+		break;
+
+	    case REGISTER_WRITE_FUNC: // Запись аналоговых регистров
 		regCount = (recvBuffer[4] << 8) | recvBuffer[5];
-		if ((regCount > 0) && (regCount <= REGISTER_MAX))
-		    return sendRegisterValues(regAddr, regCount);
-	    } else sendError(recvBuffer[1], ERROR_INVALID_VALUE);
-	} else if (recvBuffer[1] == REGISTER_WRITE_FUNC) { // Запись аналоговых регистров
-	    regAddr = (recvBuffer[2] << 8) | recvBuffer[3];
-	    regCount = (recvBuffer[4] << 8) | recvBuffer[5];
-	    if ((regCount > 0)  && (regCount <= REGISTER_MAX)) {
-		uint8_t bytesCount = regCount * 2;
-		crc = (recvBuffer[5 + bytesCount] << 8) | recvBuffer[4 + bytesCount];
-		if (crc == CRC16(&recvBuffer[0], recvLength - 2))
-		    return recvRegisterValues(regAddr, regCount, &recvBuffer[4]);
-	    }
-	} else  sendError(recvBuffer[1], ERROR_INVALID_FUNCTION);
+		if ((regCount > 0) && (regCount <= REGISTER_MAX)) {
+		    regAddr = (recvBuffer[2] << 8) | recvBuffer[3];
+		    uint8_t bytesCount = regCount * 2;
+		    crc = (recvBuffer[5 + bytesCount] << 8) | recvBuffer[4 + bytesCount];
+		    if (crc == CRC16(&recvBuffer[0], recvLength - 2)) {
+			return recvRegisterValues(regAddr, regCount, &recvBuffer[4]);
+		    } else err = ERROR_INVALID_VALUE;
+		}
+		break;
+
+	    default:
+		err = ERROR_INVALID_FUNCTION;
+	}
     }
 
+    sendError(recvBuffer[1], err);
     return 0;
 }
 
 uint8_t recvRegisterValues(uint16_t regAddr, uint16_t regCount, uint8_t regValues[]) {
     if ((regAddr == REGISTER_SETTINGS_ADDR) && (regCount == 1)) {}
-    sendError(0x04, ERROR_INVALID_ADDRESS);
+    sendError(REGISTER_WRITE_FUNC, ERROR_INVALID_ADDRESS);
     return 0;
 }
 
 // Отправка значений регистров
 uint8_t sendRegisterValues(uint16_t regAddr, uint16_t regCount) {
-    uint8_t bytesCount = (regCount * 2);
+    uint8_t bytesCount = regCount * 2;
 
     // Посылаем по 2 байта на регистр
-    sendBuffer[0] = SLAVE_ID + slaveAddr;
+    sendBuffer[0] = slaveAddr;
     sendBuffer[1] = REGISTER_READ_FUNC;
     sendBuffer[2] = bytesCount;
 
@@ -100,18 +110,17 @@ uint8_t sendRegisterValues(uint16_t regAddr, uint16_t regCount) {
 	    // Обрезаем знак, mb2hal требуются беззнаковые числа
 	    int16_t v = registers[regCount-1];
 	    uint16_t r = (v > 0) ? v : -v;
-	    sendBuffer[regCount * 2 + 1] = r >> 8;
-	    sendBuffer[regCount * 2 + 2] = r & 0xff;
+	    // Такое прокатывает для беззнаковых чисел, ну и плевали
+	    // мы на strict-aliasing ;)
+	    *(uint16_t *)&sendBuffer[regCount * 2 + 1] = (r >> 8) | (r << 8);
 	} while (--regCount);
 
 	// Инвертируем синхросигнал
 	registers[REGISTER_HEARTBEAT] = !registers[REGISTER_HEARTBEAT];
 
-	// Считаем CRC
-	uint16_t crc = CRC16(&sendBuffer[0], bytesCount + 3);
-	sendBuffer[bytesCount + 3] = (crc & 0xff);
-	sendBuffer[bytesCount + 4] = (crc >> 8);
-	sendLength += bytesCount + 5;
+	// Считаем CRC. Небольшой трик, чтобы сэкономить 10 байт размера
+	*(uint16_t *)&sendBuffer[bytesCount + 3] = CRC16(&sendBuffer[0], bytesCount + 3);
+	sendLength = bytesCount + 5;
 
 	// Разрешаем передачу
 	UCSRB |= ((1 << UDRE) | (1 << TXEN));
@@ -119,20 +128,18 @@ uint8_t sendRegisterValues(uint16_t regAddr, uint16_t regCount) {
 	return 1;
     }
 
-    sendError(0x04, ERROR_INVALID_ADDRESS);
+    sendError(REGISTER_READ_FUNC, ERROR_INVALID_ADDRESS);
     return 0;
 }
 
 void sendError(uint8_t funcCode, uint8_t errorCode) {
-    sendBuffer[0] = SLAVE_ID + slaveAddr;
+    sendBuffer[0] = slaveAddr;
     sendBuffer[1] = funcCode | 0x80;
     sendBuffer[2] = errorCode;
 
-    // Считаем CRC
-    uint16_t crc = CRC16(&sendBuffer[0], 3);
-    sendBuffer[3] = (crc & 0xff);
-    sendBuffer[4] = (crc >> 8);
-    sendLength += 5;
+    // Считаем CRC, такой трик экономит нам байтики размера.
+    *((uint16_t *)&sendBuffer[3]) = CRC16(&sendBuffer[0], 3);
+    sendLength = 5;
 
     // Разрешаем передачу
     UCSRB |= ((1 << UDRE) | (1 << TXEN));

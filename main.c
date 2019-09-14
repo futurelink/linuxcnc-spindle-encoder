@@ -55,7 +55,7 @@ void initPorts() {
     DDRB = (1 << RED_LED) | (1 << YELLOW_LED);			// Выходы на индикацию
 
     // Считаем смещение адреса слейва
-    slaveAddr = (PIND & (1 << PD6) & (1 << PD5) & (1 << PD4) & (1 << PD3)) >> PD3;
+    slaveAddr = SLAVE_ID + ((PIND & (1 << PD6) & (1 << PD5) & (1 << PD4) & (1 << PD3)) >> PD3);
 }
 
 void initUSART(uint8_t parity) {
