@@ -31,6 +31,7 @@ static void initUSART(uint8_t parity);
 static void initTimer1(uint8_t timeout50usTicks);
 static void initTimer0(void);
 
+extern uint8_t slaveAddr;
 extern volatile uint8_t sentLength;
 extern volatile uint8_t sendLength;
 extern uint8_t sendBuffer[];
@@ -52,6 +53,9 @@ void initPorts() {
     GIMSK |= (1 << PCIE);					// Разрешаем прерывания PCINT
     PCMSK |= (1 << PCINT2) | (1 << PCINT1) | (1 << PCINT0);	// Срабатывает на PCINT0, PCINT1 и PCINT2
     DDRB = (1 << RED_LED) | (1 << YELLOW_LED);			// Выходы на индикацию
+
+    // Считаем смещение адреса слейва
+    slaveAddr = (PIND & (1 << PD6) & (1 << PD5) & (1 << PD4) & (1 << PD3)) >> PD3;
 }
 
 void initUSART(uint8_t parity) {

@@ -22,6 +22,8 @@ along with this project.  If not, see <http://www.gnu.org/licenses/>.
 
 /* Variables */
 
+uint8_t slaveAddr = 0;
+
 volatile uint8_t encIndex = 0,
 		 encDirection = 0,
 		 heartbeat = 0;
@@ -39,6 +41,7 @@ uint8_t recvLength = 0;
 /* Function declarations */
 
 static uint8_t sendRegisterValues(uint16_t regAddr, uint16_t regCount);
+static uint8_t recvRegisterValues(uint16_t regAddr, uint16_t regCount, uint8_t regValues[]);
 static void sendError(uint8_t funcCode, uint8_t errorCode);
 
 /* ---------------------------------------------------------------------*/
@@ -50,10 +53,8 @@ uint8_t parseDatagram() {
 
     // Минимальная длина датаграммы 8 байт
     // Посылка адресована нам, парсим
-    if ((recvLength > 4) && (recvBuffer[0] == SLAVE_ID)) {
-	// Чтение аналоговых регистров
-	if (recvBuffer[1] == 0x04) {
-	    // Проверяем контрольную сумму
+    if ((recvLength > 7) && (recvBuffer[0] == SLAVE_ID + slaveAddr)) {
+	if (recvBuffer[1] == REGISTER_READ_FUNC) { // Чтение аналоговых регистров
 	    crc = (recvBuffer[7] << 8) | recvBuffer[6];
 	    if (crc == CRC16(&recvBuffer[0], recvLength - 2)) {
 		regAddr = (recvBuffer[2] << 8) | recvBuffer[3];
@@ -61,8 +62,27 @@ uint8_t parseDatagram() {
 		if (regCount > 0)
 		    return sendRegisterValues(regAddr, regCount);
 	    } else sendError(recvBuffer[1], ERROR_INVALID_VALUE);
-	} else sendError(recvBuffer[1], ERROR_INVALID_FUNCTION);
+	} else if (recvBuffer[1] == REGISTER_WRITE_FUNC) { // Запись аналоговых регистров
+	    regAddr = (recvBuffer[2] << 8) | recvBuffer[3];
+	    regCount = (recvBuffer[4] << 8) | recvBuffer[5];
+	    uint8_t bytesCount = regCount * 2;
+	    crc = (recvBuffer[5 + bytesCount] << 8) | recvBuffer[4 + bytesCount];
+	    if ((regCount > 0) && (crc == CRC16(&recvBuffer[0], recvLength - 2))) {
+		// Принимаем посылку с настройкой
+		return recvRegisterValues(regAddr, regCount, &recvBuffer[4]);
+	    }
+	} else  sendError(recvBuffer[1], ERROR_INVALID_FUNCTION);
     }
+
+    return 0;
+}
+
+uint8_t recvRegisterValues(uint16_t regAddr, uint16_t regCount, uint8_t regValues[]) {
+    // Настройки по адресу 0xf0 будут
+    if ((regAddr == REGISTER_SETTINGS_ADDR) && (regCount == 1)) {
+
+    }
+    sendError(0x04, ERROR_INVALID_ADDRESS);
     return 0;
 }
 
@@ -70,14 +90,18 @@ uint8_t sendRegisterValues(uint16_t regAddr, uint16_t regCount) {
     uint8_t bytesCount = (regCount * 2);
     uint16_t r;
 
+    // Посылаем по 2 байта на регистр
+    sendBuffer[0] = SLAVE_ID + slaveAddr;
+    sendBuffer[1] = 0x04;
+    sendBuffer[2] = bytesCount;
+
+    // Возвращаем настройки
+    if (regAddr == REGISTER_SETTINGS_ADDR) {
+
+    }
     // Сделано тупо, зато быстро - получить данные можно только
     // с адреса 0x00, и нужное количество регистров.
-    if (regAddr == 0x00) {
-	// Посылаем по 2 байта на регистр
-	sendBuffer[0] = SLAVE_ID;
-	sendBuffer[1] = 0x04;
-	sendBuffer[2] = bytesCount;
-
+     else if (regAddr == REGISTER_DATA_ADDR) {
 	do {
 	    switch (regCount) {
 		case 1:
@@ -121,7 +145,7 @@ uint8_t sendRegisterValues(uint16_t regAddr, uint16_t regCount) {
 }
 
 void sendError(uint8_t funcCode, uint8_t errorCode) {
-    sendBuffer[0] = SLAVE_ID;
+    sendBuffer[0] = SLAVE_ID + slaveAddr;
     sendBuffer[1] = funcCode | 0x80;
     sendBuffer[2] = errorCode;
 

@@ -36,6 +36,12 @@ along with this project.  If not, see <http://www.gnu.org/licenses/>.
 #define ERROR_PROCESSING	0x05
 #define ERROR_BUSY		0x06
 
+#define REGISTER_READ_FUNC	0x04
+#define REGISTER_WRITE_FUNC	0x06
+
+#define REGISTER_DATA_ADDR	0x00
+#define REGISTER_SETTINGS_ADDR	0xf0
+
 uint8_t parseDatagram(void);
 
 #endif
