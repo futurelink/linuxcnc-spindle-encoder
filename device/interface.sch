@@ -5,8 +5,8 @@ EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
-Title ""
-Date ""
+Title "modbus-encoder v1.2"
+Date "2019-09-14"
 Rev ""
 Comp ""
 Comment1 ""
@@ -1058,12 +1058,6 @@ Wire Wire Line
 	7150 4300 6950 4300
 Wire Wire Line
 	7150 4400 6950 4400
-Wire Bus Line
-	7550 4600 7550 4900
-Wire Bus Line
-	8550 1650 8550 4600
-Wire Bus Line
-	7250 2250 7250 4600
 Text Label 7050 4100 0    50   ~ 0
 A0
 Text Label 7050 4200 0    50   ~ 0
@@ -1072,4 +1066,21 @@ Text Label 7050 4300 0    50   ~ 0
 A2
 Text Label 7050 4400 0    50   ~ 0
 A3
+$Comp
+L Graphic:Logo_Open_Hardware_Small #LOGO1
+U 1 1 5D7D2E28
+P 10900 6850
+F 0 "#LOGO1" H 10900 7125 50  0001 C CNN
+F 1 "Logo_Open_Hardware_Small" H 10900 6625 50  0001 C CNN
+F 2 "" H 10900 6850 50  0001 C CNN
+F 3 "~" H 10900 6850 50  0001 C CNN
+	1    10900 6850
+	1    0    0    -1  
+$EndComp
+Wire Bus Line
+	7550 4600 7550 4900
+Wire Bus Line
+	8550 1650 8550 4600
+Wire Bus Line
+	7250 2250 7250 4600
 $EndSCHEMATC
