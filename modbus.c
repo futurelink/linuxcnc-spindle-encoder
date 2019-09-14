@@ -24,17 +24,14 @@ along with this project.  If not, see <http://www.gnu.org/licenses/>.
 
 uint8_t slaveAddr = 0;
 
-volatile uint8_t encIndex = 0,
-		 encDirection = 0,
-		 heartbeat = 0;
+// Регистры данных
+volatile int16_t registers[6];
 
-volatile uint16_t encSpeed = 0;
-int16_t encIncrement = 0,
-	encPosition = 0;
-
+// Буфер передачи данных
 uint8_t sendBuffer[SEND_BUFFER_MAX];
 uint8_t sendLength = 0, sentLength = 0;
 
+// Буфер приема данных
 uint8_t recvBuffer[RECV_BUFFER_MAX];
 uint8_t recvLength = 0;
 
@@ -59,17 +56,17 @@ uint8_t parseDatagram() {
 	    if (crc == CRC16(&recvBuffer[0], recvLength - 2)) {
 		regAddr = (recvBuffer[2] << 8) | recvBuffer[3];
 		regCount = (recvBuffer[4] << 8) | recvBuffer[5];
-		if (regCount > 0)
+		if ((regCount > 0) && (regCount <= REGISTER_MAX))
 		    return sendRegisterValues(regAddr, regCount);
 	    } else sendError(recvBuffer[1], ERROR_INVALID_VALUE);
 	} else if (recvBuffer[1] == REGISTER_WRITE_FUNC) { // Запись аналоговых регистров
 	    regAddr = (recvBuffer[2] << 8) | recvBuffer[3];
 	    regCount = (recvBuffer[4] << 8) | recvBuffer[5];
-	    uint8_t bytesCount = regCount * 2;
-	    crc = (recvBuffer[5 + bytesCount] << 8) | recvBuffer[4 + bytesCount];
-	    if ((regCount > 0) && (crc == CRC16(&recvBuffer[0], recvLength - 2))) {
-		// Принимаем посылку с настройкой
-		return recvRegisterValues(regAddr, regCount, &recvBuffer[4]);
+	    if ((regCount > 0)  && (regCount <= REGISTER_MAX)) {
+		uint8_t bytesCount = regCount * 2;
+		crc = (recvBuffer[5 + bytesCount] << 8) | recvBuffer[4 + bytesCount];
+		if (crc == CRC16(&recvBuffer[0], recvLength - 2))
+		    return recvRegisterValues(regAddr, regCount, &recvBuffer[4]);
 	    }
 	} else  sendError(recvBuffer[1], ERROR_INVALID_FUNCTION);
     }
@@ -78,21 +75,18 @@ uint8_t parseDatagram() {
 }
 
 uint8_t recvRegisterValues(uint16_t regAddr, uint16_t regCount, uint8_t regValues[]) {
-    // Настройки по адресу 0xf0 будут
-    if ((regAddr == REGISTER_SETTINGS_ADDR) && (regCount == 1)) {
-
-    }
+    if ((regAddr == REGISTER_SETTINGS_ADDR) && (regCount == 1)) {}
     sendError(0x04, ERROR_INVALID_ADDRESS);
     return 0;
 }
 
+// Отправка значений регистров
 uint8_t sendRegisterValues(uint16_t regAddr, uint16_t regCount) {
     uint8_t bytesCount = (regCount * 2);
-    uint16_t r;
 
     // Посылаем по 2 байта на регистр
     sendBuffer[0] = SLAVE_ID + slaveAddr;
-    sendBuffer[1] = 0x04;
+    sendBuffer[1] = REGISTER_READ_FUNC;
     sendBuffer[2] = bytesCount;
 
     // Возвращаем настройки
@@ -103,30 +97,15 @@ uint8_t sendRegisterValues(uint16_t regAddr, uint16_t regCount) {
     // с адреса 0x00, и нужное количество регистров.
      else if (regAddr == REGISTER_DATA_ADDR) {
 	do {
-	    switch (regCount) {
-		case 1:
-		    r = heartbeat; break;
-		case 2:
-		    // Не выдаем отрицательные значения, т.к. mb2hal понимает только беззнаковые
-		    r = (encPosition > 0) ? encPosition : -encPosition; break;
-		case 3:
-		    // и тут тоже самое...
-		    r = (encIncrement > 0) ? encIncrement : -encIncrement; break;
-		case 4:
-		    r = encSpeed; break;
-		case 5:
-		    r = encIndex; break;
-		case 6:
-		    r = encDirection; break;
-		default:
-		    r = 0;
-	    }
+	    // Обрезаем знак, mb2hal требуются беззнаковые числа
+	    int16_t v = registers[regCount-1];
+	    uint16_t r = (v > 0) ? v : -v;
 	    sendBuffer[regCount * 2 + 1] = r >> 8;
 	    sendBuffer[regCount * 2 + 2] = r & 0xff;
 	} while (--regCount);
 
 	// Инвертируем синхросигнал
-	heartbeat = !heartbeat;
+	registers[REGISTER_HEARTBEAT] = !registers[REGISTER_HEARTBEAT];
 
 	// Считаем CRC
 	uint16_t crc = CRC16(&sendBuffer[0], bytesCount + 3);

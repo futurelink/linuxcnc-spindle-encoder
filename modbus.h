@@ -25,9 +25,6 @@ along with this project.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "crc.h"
 
-#define RECV_BUFFER_MAX		24
-#define SEND_BUFFER_MAX		24
-#define ERR_BUFFER_LENGTH	5
 
 #define ERROR_INVALID_FUNCTION	0x01
 #define ERROR_INVALID_ADDRESS	0x02
@@ -39,8 +36,24 @@ along with this project.  If not, see <http://www.gnu.org/licenses/>.
 #define REGISTER_READ_FUNC	0x04
 #define REGISTER_WRITE_FUNC	0x06
 
+#define REGISTER_HEARTBEAT	0
+#define REGISTER_POSITION	1
+#define REGISTER_POSITION_INC	2
+#define REGISTER_SPEED		3
+#define REGISTER_INDEX		4
+#define REGISTER_DIRECTION	5
+
+#define REGISTER_MAX		6
 #define REGISTER_DATA_ADDR	0x00
 #define REGISTER_SETTINGS_ADDR	0xf0
+
+// Размер буфера определяется как максимальное
+// количество регистров (6 * 2 байта) + 2 байта CRC + 1 байт функция
+// + 1 байт адрес + 4 байта адрес и кол-во регистров.
+// Это максимальный размер посылки.
+#define RECV_BUFFER_MAX		20
+#define SEND_BUFFER_MAX		20
+#define ERR_BUFFER_LENGTH	5
 
 uint8_t parseDatagram(void);
 
