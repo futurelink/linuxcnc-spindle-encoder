@@ -22,6 +22,7 @@ along with this project.  If not, see <http://www.gnu.org/licenses/>.
 #include "config.h"
 #include "modbus.h"
 
+extern int16_t encoderPPR;
 extern int16_t registers[];
 
 extern uint8_t recvLength;
@@ -103,7 +104,7 @@ ISR(TIMER0_COMPA_vect) {
 
     // Cчитаем обороты в минутуENCODER_Q нужен, чтобы знать насколько сократить
     // числа, чтобы все влазило в 16 бит
-    registers[REGISTER_SPEED] = (encSpeedMeasure * 60 / TIMER0_PERIOD_MS * (1000 / ENCODER_Q)) / (ENCODER_PPR / ENCODER_Q / 4);
+    registers[REGISTER_SPEED] = (encSpeedMeasure * 60 / TIMER0_PERIOD_MS * (1000 / ENCODER_Q)) /  (ENCODER_PPR / ENCODER_Q / 4);
     encSpeedMeasure = 0;
 }
 
@@ -133,7 +134,7 @@ ISR(PCINT_vect) {
     // Метка Z эмулируется при переходе
     // через полный оборот или при переходе черео 0.
     int16_t pos = registers[REGISTER_POSITION];
-    if ((pos >= ENCODER_PPR) || (-pos >= ENCODER_PPR) || (pos == 0)) {
+    if ((pos >= ENCODER_PPR) || (pos <= -ENCODER_PPR) || (pos == 0)) {
 	registers[REGISTER_POSITION] = 0;
 	registers[REGISTER_INDEX] = 1;
     }
