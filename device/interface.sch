@@ -187,12 +187,12 @@ $EndComp
 $Comp
 L power:+5V #PWR06
 U 1 1 5D7AEF69
-P 7300 950
-F 0 "#PWR06" H 7300 800 50  0001 C CNN
-F 1 "+5V" H 7300 1090 50  0000 C CNN
-F 2 "" H 7300 950 50  0000 C CNN
-F 3 "" H 7300 950 50  0000 C CNN
-	1    7300 950 
+P 7750 950
+F 0 "#PWR06" H 7750 800 50  0001 C CNN
+F 1 "+5V" H 7750 1090 50  0000 C CNN
+F 2 "" H 7750 950 50  0000 C CNN
+F 3 "" H 7750 950 50  0000 C CNN
+	1    7750 950 
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -587,7 +587,7 @@ Wire Wire Line
 Connection ~ 6150 1000
 Connection ~ 6150 1400
 Wire Wire Line
-	7300 1000 7300 950 
+	7750 1000 7750 950 
 Wire Bus Line
 	8450 4600 8450 4900
 Wire Wire Line
@@ -799,7 +799,7 @@ $EndComp
 Wire Wire Line
 	6400 1000 6550 1000
 Wire Wire Line
-	7150 1000 7300 1000
+	7150 1000 7250 1000
 Wire Wire Line
 	6350 4800 6350 4900
 Wire Wire Line
@@ -1058,12 +1058,6 @@ Wire Wire Line
 	7150 4300 6950 4300
 Wire Wire Line
 	7150 4400 6950 4400
-Wire Bus Line
-	7550 4600 7550 4900
-Wire Bus Line
-	8550 1650 8550 4600
-Wire Bus Line
-	7250 2250 7250 4600
 Text Label 7050 4100 0    50   ~ 0
 A0
 Text Label 7050 4200 0    50   ~ 0
@@ -1072,4 +1066,51 @@ Text Label 7050 4300 0    50   ~ 0
 A2
 Text Label 7050 4400 0    50   ~ 0
 A3
+$Comp
+L Device:CP C5
+U 1 1 5D7F3934
+P 7250 1200
+F 0 "C5" H 7300 1300 50  0000 L CNN
+F 1 "470mF" H 7250 1100 50  0000 L CNN
+F 2 "Capacitor_SMD:C_Elec_6.3x7.7" H 7288 1050 50  0001 C CNN
+F 3 "~" H 7250 1200 50  0001 C CNN
+	1    7250 1200
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C6
+U 1 1 5D7F3A01
+P 7550 1200
+F 0 "C6" H 7600 1300 50  0000 L CNN
+F 1 "0,1mF" H 7600 1100 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 7588 1050 50  0001 C CNN
+F 3 "~" H 7550 1200 50  0001 C CNN
+	1    7550 1200
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7250 1050 7250 1000
+Connection ~ 7250 1000
+Wire Wire Line
+	7250 1000 7550 1000
+Wire Wire Line
+	7550 1050 7550 1000
+Connection ~ 7550 1000
+Wire Wire Line
+	7550 1000 7750 1000
+Wire Wire Line
+	7250 1350 7250 1400
+Wire Wire Line
+	7250 1400 6850 1400
+Wire Wire Line
+	7550 1350 7550 1400
+Wire Wire Line
+	7550 1400 7250 1400
+Wire Bus Line
+	7550 4600 7550 4900
+Wire Bus Line
+	8550 1650 8550 4600
+Wire Bus Line
+	7250 2250 7250 4600
+Connection ~ 7250 1400
 $EndSCHEMATC
