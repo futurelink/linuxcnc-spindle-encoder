@@ -7,8 +7,7 @@ BAUDRATE = 38400
 # Fuses for external oscillator 16Mhz
 F_CPU = 16000000UL
 LFUSE = 0xFF
-#LFUSE = 0xE4
-HFUSE = 0xDF
+HFUSE = 0xCF
 
 # Toolchain
 CC=avr-gcc

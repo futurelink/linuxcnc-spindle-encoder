@@ -17,6 +17,7 @@ along with this project.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#include <avr/wdt.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
@@ -31,11 +32,17 @@ static void initUSART(uint8_t parity);
 static void initTimer1(uint8_t timeout50usTicks);
 static void initTimer0(void);
 
+extern uint8_t slaveAddr;
 extern volatile uint8_t sentLength;
 extern volatile uint8_t sendLength;
 extern uint8_t sendBuffer[];
 
 int main(void) {
+    asm("WDR");
+    MCUSR &= ~(1 << WDRF);
+    WDTCSR |= (1 << WDCE) | (1 << WDE);
+    WDTCSR = (1 << WDE) | (1 << WDP2) | (1 << WDP1); // Вотчдог через 1 сек
+
     initUSART(PARITY_NONE);
     initTimer1(35);
     initTimer0();
@@ -55,6 +62,10 @@ void initPorts() {
     DDRB = (1 << RED_LED) | (1 << YELLOW_LED);			// Выходы на индикацию
     DDRD |= (1 << PD2);		// MAX483 чтение-запись
     PORTD &= ~(1 << PD2);	// MAX483 на чтение
+    PORTD |= (1 << PD6) | (1 << PD5) | (1 << PD4) | (1 << PD3);
+
+    // Считаем смещение адреса слейва
+    slaveAddr = SLAVE_ID + ((PIND & (1 << PD6) & (1 << PD5) & (1 << PD4) & (1 << PD3)) >> PD3);
 }
 
 void initUSART(uint8_t parity) {

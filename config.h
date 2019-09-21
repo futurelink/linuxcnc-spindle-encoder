@@ -29,7 +29,7 @@ along with this project.  If not, see <http://www.gnu.org/licenses/>.
 //#define ENCODER_REVERSE	// Изменить направление энкодера
 //#define ENCODER_HAS_Z		// Есть метка Z на энкодере, если нет, то она программная
 #define ENCODER_PPR	4096	// Импульсов на оборот после интерполяции (PPR * 4)
-#define ENCODER_Q	500	// Коэффициент сокращения
+#define ENCODER_Q	500U	// Коэффициент сокращения
 
 #define TIMER1_PRESCALER    ( 1024UL )
 #define TIMER1_FREQ         ( F_CPU / TIMER1_PRESCALER )
