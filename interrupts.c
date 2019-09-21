@@ -58,7 +58,6 @@ ISR(USART_UDRE_vect) {
 	PORTB |= (1 << YELLOW_LED);		// Зажжем светодиод, передаем сообщение
 	UDR = sendBuffer[sentLength++];
     }
-
 }
 
 //
