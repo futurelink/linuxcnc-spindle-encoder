@@ -5,14 +5,14 @@ TARGET = encoder-modbus
 
 # Fuses for external oscillator 16Mhz
 F_CPU = 16000000UL
-LFUSE = 0xCE
-HFUSE = 0xDF
+LFUSE = 0xDE
+HFUSE = 0xCF
 
 # Toolchain
 CC=avr-gcc
 OBJCOPY=avr-objcopy
 AVRDUDE=avrdude -P /dev/ttyUSB0
-MODPOLL=modpoll -p none /dev/ttyUSB1
+MODPOLL=mbpoll -p none /dev/ttyUSB1
 
 COMMON = -mmcu=$(MCU)
 
@@ -41,7 +41,7 @@ flash: $(TARGET).hex
 	$(AVRDUDE) -p $(MCU) -c stk500 -v -b 115200 -e -U flash:w:$(TARGET).hex:i -U lfuse:w:$(LFUSE):m -U hfuse:w:$(HFUSE):m
 
 poll:
-	$(MODPOLL) -m rtu -a 0x85 -c 6 -t 3 -l 20 -b 38400
+	$(MODPOLL) -m rtu -a 0x85 -c 6 -t 3 -l 100 -b 38400
 
 ##Link
 $(TARGET).elf: $(OBJECTS)

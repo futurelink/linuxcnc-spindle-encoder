@@ -17,6 +17,7 @@ along with this project.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#include <avr/wdt.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
@@ -37,6 +38,11 @@ extern volatile uint8_t sendLength;
 extern uint8_t sendBuffer[];
 
 int main(void) {
+    asm("WDR");
+    MCUSR &= ~(1 << WDRF);
+    WDTCSR |= (1 << WDCE) | (1 << WDE);
+    WDTCSR = (1 << WDE) | (1 << WDP2) | (1 << WDP1); // Вотчдог через 1 сек
+
     initUSART(PARITY_NONE);
     initTimer1(35);
     initTimer0();
