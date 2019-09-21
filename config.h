@@ -17,7 +17,6 @@ along with this project.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#define BAUD 38400
 #include <util/setbaud.h>
 
 #ifndef __CONFIG_H

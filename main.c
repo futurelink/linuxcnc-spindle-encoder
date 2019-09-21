@@ -43,6 +43,7 @@ int main(void) {
 
     sei();
 
+    PORTB |= (1 << RED_LED); // Индикатор включения
     while (1) asm volatile("nop" ::);
 
     return 0;
@@ -52,6 +53,8 @@ void initPorts() {
     GIMSK |= (1 << PCIE);					// Разрешаем прерывания PCINT
     PCMSK |= (1 << PCINT2) | (1 << PCINT1) | (1 << PCINT0);	// Срабатывает на PCINT0, PCINT1 и PCINT2
     DDRB = (1 << RED_LED) | (1 << YELLOW_LED);			// Выходы на индикацию
+    DDRD |= (1 << PD2);		// MAX483 чтение-запись
+    PORTD &= ~(1 << PD2);	// MAX483 на чтение
 }
 
 void initUSART(uint8_t parity) {

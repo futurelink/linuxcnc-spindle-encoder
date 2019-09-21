@@ -48,14 +48,17 @@ static const int8_t incTable[16] = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};
 // Тут происходит отправка данных посылки
 //
 ISR(USART_UDRE_vect) {
-    if (sentLength == sendLength) {
+    if (sentLength > sendLength) {
+	PORTD &= ~(1 << PD2);			// MAX483 на чтение
 	UCSRB &= ~((1 << UDRE) | (1 << TXEN));	// Запрещаем передачу
 	PORTB &= ~(1 << YELLOW_LED);		// Погасим светодиод, передали сообщение
 	sendLength = sentLength = 0;
     } else {
+	PORTD |= (1 << PD2);			// MAX483 на запись
 	PORTB |= (1 << YELLOW_LED);		// Зажжем светодиод, передаем сообщение
 	UDR = sendBuffer[sentLength++];
     }
+
 }
 
 //
@@ -63,9 +66,12 @@ ISR(USART_UDRE_vect) {
 //
 ISR(USART_RX_vect) {
     if (UCSRA & (1 << RXC)) {
+	PORTB |= (1 << RED_LED);	// Зажжем светодиод метки индекса
 	if (recvLength < RECV_BUFFER_MAX) {
 	    recvBuffer[recvLength++] = UDR;
 	}
+
+	PORTB &= ~(1 << RED_LED);	// Погасим светодиод метки индекса
 
 	// Включаем таймер тишины
 	TCNT1 = 0;

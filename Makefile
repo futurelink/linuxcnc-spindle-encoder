@@ -2,23 +2,25 @@
 PROJECT = encoder-modbus
 MCU = attiny2313
 TARGET = encoder-modbus
+BAUDRATE = 38400
 
 # Fuses for external oscillator 16Mhz
 F_CPU = 16000000UL
-LFUSE = 0xCE
+LFUSE = 0xFF
+#LFUSE = 0xE4
 HFUSE = 0xDF
 
 # Toolchain
 CC=avr-gcc
 OBJCOPY=avr-objcopy
 AVRDUDE=avrdude -P /dev/ttyUSB0
-MODPOLL=modpoll -p none /dev/ttyUSB1
+MODPOLL=mbpoll -p none /dev/ttyUSB1 -b $(BAUDRATE)
 
 COMMON = -mmcu=$(MCU)
 
 ## Compile options common for all C compilation units.
 CFLAGS = $(COMMON) -std=gnu99
-CFLAGS += -Wall -gstabs -DF_CPU=$(F_CPU)  -Os -Wall -Wstrict-prototypes -fno-exceptions -ffunction-sections -fdata-sections
+CFLAGS += -Wall -gstabs -DBAUD=$(BAUDRATE) -DF_CPU=$(F_CPU)  -Os -Wall -Wstrict-prototypes -fno-exceptions -ffunction-sections -fdata-sections
 
 ## Assembly specific flags
 ASMFLAGS = $(COMMON)
@@ -41,7 +43,7 @@ flash: $(TARGET).hex
 	$(AVRDUDE) -p $(MCU) -c stk500 -v -b 115200 -e -U flash:w:$(TARGET).hex:i -U lfuse:w:$(LFUSE):m -U hfuse:w:$(HFUSE):m
 
 poll:
-	$(MODPOLL) -m rtu -a 0x85 -c 6 -t 3 -l 20 -b 38400
+	$(MODPOLL) -m rtu -a 0x85 -c 6 -t 3 -l 100 -o 5 -R -P none
 
 ##Link
 $(TARGET).elf: $(OBJECTS)
