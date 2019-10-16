@@ -5,7 +5,7 @@ TARGET = encoder-modbus
 BAUDRATE = 38400
 
 # Fuses for external oscillator 16Mhz
-F_CPU = 16000000UL
+F_CPU = 12000000UL
 LFUSE = 0xFF
 HFUSE = 0xCF
 

@@ -11,18 +11,18 @@
     (via_costs 50)
     (plane_via_costs 5)
     (start_ripup_costs 100)
-    (start_pass_no 2891)
+    (start_pass_no 4405)
     (layer_rule F.Cu
       (active on)
       (preferred_direction vertical)
       (preferred_direction_trace_costs 1.0)
-      (against_preferred_direction_trace_costs 2.2)
+      (against_preferred_direction_trace_costs 2.5)
     )
     (layer_rule B.Cu
       (active on)
       (preferred_direction horizontal)
       (preferred_direction_trace_costs 1.0)
-      (against_preferred_direction_trace_costs 1.8)
+      (against_preferred_direction_trace_costs 1.7)
     )
   )
   (rule
@@ -30,11 +30,17 @@
     (clear 200.2)
     (clear 125.0 (type smd_to_turn_gap))
     (clear 500.2 (type default_+24V))
+    (clear 500.2 (type default_"RS-485"))
     (clear 50.0 (type smd_smd))
     (clear 500.2 (type smd_+24V))
+    (clear 500.2 (type smd_"RS-485"))
     (clear 500.2 (type "kicad_default"_+24V))
+    (clear 500.2 (type "kicad_default"_"RS-485"))
     (clear 500.2 (type +24V_+24V))
     (clear 500.2 (type +24V_+5V))
+    (clear 500.2 (type +24V_"RS-485"))
+    (clear 500.2 (type +5V_"RS-485"))
+    (clear 500.2 (type "RS-485"_"RS-485"))
   )
   (padstack "Via[0-1]_800:400_um"
     (shape
@@ -53,12 +59,6 @@
       (circle B.Cu 1200.0 0.0 0.0)
     )
     (attach off)
-  )
-  (via 
-    "Via[0-1]_800:400_um-RS-485" "Via[0-1]_800:400_um" "RS-485"
-  )
-  (via 
-    "Via[0-1]_1200:800_um-RS-485" "Via[0-1]_1200:800_um" "RS-485"
   )
   (via 
     "Via[0-1]_800:400_um" "Via[0-1]_800:400_um" default
@@ -84,8 +84,11 @@
   (via 
     "Via[0-1]_1200:800_um-+5V" "Via[0-1]_1200:800_um" +5V
   )
-  (via_rule
-    "RS-485" "Via[0-1]_800:400_um-RS-485"
+  (via 
+    "Via[0-1]_800:400_um-RS-485" "Via[0-1]_800:400_um" "RS-485"
+  )
+  (via 
+    "Via[0-1]_1200:800_um-RS-485" "Via[0-1]_1200:800_um" "RS-485"
   )
   (via_rule
     default "Via[0-1]_800:400_um"
@@ -98,6 +101,9 @@
   )
   (via_rule
     +5V "Via[0-1]_800:400_um-+5V"
+  )
+  (via_rule
+    "RS-485" "Via[0-1]_800:400_um-RS-485"
   )
   (class default
     (clearance_class default)

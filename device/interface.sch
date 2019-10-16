@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:interface-cache
-EELAYER 26 0
+EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -383,7 +383,7 @@ U 1 1 5D7B2E24
 P 7650 3750
 F 0 "D1" H 7650 3850 50  0000 C CNN
 F 1 "LED_RED" H 7650 3650 50  0000 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 7650 3750 50  0001 C CNN
+F 2 "LED_SMD:LED_1206_3216Metric" H 7650 3750 50  0001 C CNN
 F 3 "" H 7650 3750 50  0000 C CNN
 	1    7650 3750
 	0    -1   -1   0   
@@ -394,7 +394,7 @@ U 1 1 5D7B2E77
 P 7950 3750
 F 0 "D2" H 7950 3850 50  0000 C CNN
 F 1 "LED_YEL" H 7950 3650 50  0000 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 7950 3750 50  0001 C CNN
+F 2 "LED_SMD:LED_1206_3216Metric" H 7950 3750 50  0001 C CNN
 F 3 "" H 7950 3750 50  0000 C CNN
 	1    7950 3750
 	0    -1   -1   0   
@@ -458,39 +458,6 @@ F 2 "Resistor_SMD:R_0805_2012Metric" V 9630 4350 50  0001 C CNN
 F 3 "" H 9700 4350 50  0000 C CNN
 	1    9700 4350
 	1    0    0    -1  
-$EndComp
-$Comp
-L Device:D_Zener D3
-U 1 1 5D7AF25F
-P 9050 4350
-F 0 "D3" H 9050 4450 50  0000 C CNN
-F 1 "5V" H 9050 4250 50  0000 C CNN
-F 2 "Package_TO_SOT_SMD:SOT-23" H 9050 4350 50  0001 C CNN
-F 3 "" H 9050 4350 50  0000 C CNN
-	1    9050 4350
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:D_Zener D4
-U 1 1 5D7AF2EA
-P 9500 4350
-F 0 "D4" H 9500 4450 50  0000 C CNN
-F 1 "5V" H 9500 4250 50  0000 C CNN
-F 2 "Package_TO_SOT_SMD:SOT-23" H 9500 4350 50  0001 C CNN
-F 3 "" H 9500 4350 50  0000 C CNN
-	1    9500 4350
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:D_Zener D5
-U 1 1 5D7AF39E
-P 9950 4350
-F 0 "D5" H 9950 4450 50  0000 C CNN
-F 1 "5V" H 9950 4250 50  0000 C CNN
-F 2 "Package_TO_SOT_SMD:SOT-23" H 9950 4350 50  0001 C CNN
-F 3 "" H 9950 4350 50  0000 C CNN
-	1    9950 4350
-	0    1    1    0   
 $EndComp
 $Comp
 L power:GND #PWR016
@@ -1067,8 +1034,7 @@ A2
 Text Label 7050 4400 0    50   ~ 0
 A3
 $Comp
-<<<<<<< HEAD
-L Graphic:Logo_Open_Hardware_Small #LOGO1
+L _NONAME_ #LOGO1
 U 1 1 5D7D2E28
 P 10900 6850
 F 0 "#LOGO1" H 10900 7125 50  0001 C CNN
@@ -1076,17 +1042,6 @@ F 1 "Logo_Open_Hardware_Small" H 10900 6625 50  0001 C CNN
 F 2 "" H 10900 6850 50  0001 C CNN
 F 3 "~" H 10900 6850 50  0001 C CNN
 	1    10900 6850
-	1    0    0    -1  
-$EndComp
-=======
-L Device:CP C5
-U 1 1 5D7F3934
-P 7250 1200
-F 0 "C5" H 7300 1300 50  0000 L CNN
-F 1 "100mF" H 7250 1100 50  0000 L CNN
-F 2 "Capacitor_SMD:C_Elec_6.3x7.7" H 7288 1050 50  0001 C CNN
-F 3 "~" H 7250 1200 50  0001 C CNN
-	1    7250 1200
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -1139,17 +1094,46 @@ Wire Wire Line
 	10100 2950 8650 2950
 Wire Wire Line
 	10200 2750 10200 2850
->>>>>>> devel
+Connection ~ 10200 2850
+Wire Wire Line
+	10200 2850 10400 2850
 Wire Bus Line
 	7550 4600 7550 4900
 Wire Bus Line
 	8550 1650 8550 4600
 Wire Bus Line
 	7250 2250 7250 4600
-<<<<<<< HEAD
-=======
-Connection ~ 10200 2850
-Wire Wire Line
-	10200 2850 10400 2850
->>>>>>> devel
+$Comp
+L Diode:BZX84Cxx D3
+U 1 1 5DA7FB40
+P 9050 4350
+F 0 "D3" V 9150 4350 50  0000 L CNN
+F 1 "BZX84Cxx" V 8800 4150 50  0000 L CNN
+F 2 "Diode_SMD:D_SOT-23_ANK" H 9050 4175 50  0001 C CNN
+F 3 "https://diotec.com/tl_files/diotec/files/pdf/datasheets/bzx84c2v4.pdf" H 9050 4350 50  0001 C CNN
+	1    9050 4350
+	0    1    1    0   
+$EndComp
+$Comp
+L Diode:BZX84Cxx D4
+U 1 1 5DA83569
+P 9500 4350
+F 0 "D4" V 9600 4350 50  0000 L CNN
+F 1 "BZX84Cxx" V 9250 4150 50  0000 L CNN
+F 2 "Diode_SMD:D_SOT-23_ANK" H 9500 4175 50  0001 C CNN
+F 3 "https://diotec.com/tl_files/diotec/files/pdf/datasheets/bzx84c2v4.pdf" H 9500 4350 50  0001 C CNN
+	1    9500 4350
+	0    1    1    0   
+$EndComp
+$Comp
+L Diode:BZX84Cxx D5
+U 1 1 5DA84DFB
+P 9950 4350
+F 0 "D5" V 10050 4350 50  0000 L CNN
+F 1 "BZX84Cxx" V 9700 4200 50  0000 L CNN
+F 2 "Diode_SMD:D_SOT-23_ANK" H 9950 4175 50  0001 C CNN
+F 3 "https://diotec.com/tl_files/diotec/files/pdf/datasheets/bzx84c2v4.pdf" H 9950 4350 50  0001 C CNN
+	1    9950 4350
+	0    1    1    0   
+$EndComp
 $EndSCHEMATC
