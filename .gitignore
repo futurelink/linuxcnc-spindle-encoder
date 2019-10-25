@@ -2,7 +2,7 @@
 *.map
 *.elf
 *.bak
-device/*_pcb-bak
+device/*bak
 device/*.dsn
 device/*-cache.lib
 device/gerber/*
