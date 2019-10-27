@@ -3,7 +3,7 @@
 *.elf
 *.bak
 device/*.zip
-device/*bak
-device/*.dsn
-device/*-cache.lib
-device/gerber/*
+device/*/*bak
+device/*/*.dsn
+device/*/*-cache.lib
+device/*/gerber*
